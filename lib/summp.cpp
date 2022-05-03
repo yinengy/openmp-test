@@ -4,6 +4,8 @@
 #include <chrono>
 #include "summp.h"
 
+const int REPEAT = 100;
+
 int sum(std::vector<int> &v) {
     auto t1 = std::chrono::high_resolution_clock::now();
     int num_items = v.size();
@@ -17,9 +19,10 @@ int sum(std::vector<int> &v) {
     {   
         th_id = omp_get_thread_num();
 
-        for (int i = 0; i < batch_size; i++) {
-           
-            partial_sum += v[th_id * batch_size + i];
+        for (int j = 0; j < REPEAT; j++) {
+            for (int i = 0; i < batch_size; i++) {
+                partial_sum += v[th_id * batch_size + i];
+            }
         }
         
         #pragma omp critical
@@ -27,6 +30,6 @@ int sum(std::vector<int> &v) {
     }
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::cout << "summp: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << std::endl;
+    std::cout << "summp: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
     return 0;
 }
