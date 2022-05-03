@@ -16,6 +16,11 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
 
     int th_id;
     std::vector<int> result(num_items);
+
+    #ifdef COUNT_CORE
+    std::vector<int> core_count(48, 0);  // assume 48 core
+    #endif
+
     #pragma omp parallel private(th_id)
     {   
         th_id = omp_get_thread_num();
