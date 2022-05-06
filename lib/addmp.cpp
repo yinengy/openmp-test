@@ -6,7 +6,8 @@
 
 const int REPEAT = 10;
 
-#define COUNT_CORE
+#define COUNT_CORE  // if define, will print thread mapping bitmap
+#define BIND_CORE   // if define, will bind thread to core
 
 std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -24,6 +25,15 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     #pragma omp parallel private(th_id)
     {   
         th_id = omp_get_thread_num();
+
+        #ifdef BIND_CORE
+        // bind thread to core manually
+        cpu_set_t my_set;
+        CPU_ZERO(&my_set);
+        CPU_SET(th_id, &my_set);
+        // CPU_SET(th_id / 2, &my_set);
+        sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
+        #endif
 
         #ifdef COUNT_CORE
         core_count[sched_getcpu()] += 1;
