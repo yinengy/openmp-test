@@ -1,0 +1,170 @@
+
+;; Function int sum(int*, int) (_Z3sumPii, funcdef_no=830, decl_uid=15017, cgraph_uid=156, symbol_order=158)
+
+
+OMP region tree
+
+bb 2: gimple_omp_parallel
+    bb 9: gimple_omp_critical
+    bb 10: GIMPLE_OMP_RETURN
+bb 11: GIMPLE_OMP_RETURN
+
+Added new low gimple function _Z3sumPii._omp_fn.0 to callgraph
+Introduced new external node (int omp_get_thread_num()/173).
+Introduced new external node (void __builtin_GOMP_critical_start()/174).
+Introduced new external node (void __builtin_GOMP_critical_end()/175).
+
+;; Function _Z3sumPii._omp_fn.0 (_Z3sumPii._omp_fn.0, funcdef_no=837, decl_uid=15100, cgraph_uid=163, symbol_order=172)
+
+_Z3sumPii._omp_fn.0 (struct .omp_data_s.0 & restrict .omp_data_i)
+{
+  int sum [value-expr: .omp_data_i->sum];
+  int D.15136;
+  int * D.15135;
+  long unsigned int D.15134;
+  long unsigned int D.15133;
+  int D.15132;
+  int D.15131;
+  int i;
+  int D.15129;
+  int D.15128;
+  int j;
+  int th_id;
+  int * v;
+  int batch_size;
+  int partial_sum;
+
+  <bb 14> [0.00%]:
+
+  <bb 3> [0.00%]:
+  partial_sum = .omp_data_i->partial_sum;
+  batch_size = .omp_data_i->batch_size;
+  v = .omp_data_i->v;
+  th_id = omp_get_thread_num ();
+  j = 0;
+
+  <bb 4> [0.00%]:
+  if (j > 99)
+    goto <bb 9>; [0.00%]
+  else
+    goto <bb 5>; [0.00%]
+
+  <bb 9> [0.00%]:
+
+  <bb 10> [0.00%]:
+  __builtin_GOMP_critical_start ();
+  D.15128 = .omp_data_i->sum;
+  D.15129 = D.15128 + partial_sum;
+  .omp_data_i->sum = D.15129;
+  __builtin_GOMP_critical_end ();
+
+  <bb 11> [0.00%]:
+  return;
+
+  <bb 5> [0.00%]:
+  i = 0;
+
+  <bb 6> [0.00%]:
+  if (i >= batch_size)
+    goto <bb 8>; [0.00%]
+  else
+    goto <bb 7>; [0.00%]
+
+  <bb 8> [0.00%]:
+  j = j + 1;
+  goto <bb 4>; [0.00%]
+
+  <bb 7> [0.00%]:
+  D.15131 = th_id * batch_size;
+  D.15132 = D.15131 + i;
+  D.15133 = (long unsigned int) D.15132;
+  D.15134 = D.15133 * 4;
+  D.15135 = v + D.15134;
+  D.15136 = *D.15135;
+  partial_sum = D.15136 + partial_sum;
+  i = i + 1;
+  goto <bb 6>; [0.00%]
+
+}
+
+
+
+;; Function int sum(int*, int) (_Z3sumPii, funcdef_no=830, decl_uid=15017, cgraph_uid=156, symbol_order=158)
+
+Merging blocks 2 and 15
+Merging blocks 2 and 12
+int sum(int*, int) (int * v, int num_items)
+{
+  int i;
+  int j;
+  int sum;
+  int partial_sum;
+  int th_id;
+  int batch_size;
+  int num_threads;
+  int D.15098;
+  struct .omp_data_s.0 .omp_data_o.1;
+  int D.15118;
+  int D.15119;
+
+  <bb 2> [0.00%]:
+  num_threads = omp_get_max_threads ();
+  batch_size = num_items / num_threads;
+  partial_sum = 0;
+  sum = 0;
+  .omp_data_o.1.partial_sum = partial_sum;
+  .omp_data_o.1.batch_size = batch_size;
+  .omp_data_o.1.v = v;
+  .omp_data_o.1.sum = sum;
+  __builtin_GOMP_parallel (_Z3sumPii._omp_fn.0, &.omp_data_o.1, 0, 0);
+  sum = .omp_data_o.1.sum;
+  .omp_data_o.1 = {CLOBBER};
+  D.15098 = sum;
+
+<L6> [0.00%]:
+  return D.15098;
+
+}
+
+
+
+;; Function int main(int, char**) (main, funcdef_no=831, decl_uid=15032, cgraph_uid=157, symbol_order=159)
+
+int main(int, char**) (int argc, char * * argv)
+{
+  int D.15142;
+  int i;
+  int first[64];
+  int D.15140;
+
+  <bb 2> [0.00%]:
+  i = 0;
+
+  <bb 3> [0.00%]:
+  if (i > 63)
+    goto <bb 5>; [0.00%]
+  else
+    goto <bb 4>; [0.00%]
+
+  <bb 4> [0.00%]:
+  first[i] = 1;
+  i = i + 1;
+  goto <bb 3>; [0.00%]
+
+  <bb 5> [0.00%]:
+  D.15142 = sum (&first, 64);
+
+  <bb 6> [0.00%]:
+  D.15140 = D.15142;
+  first = {CLOBBER};
+
+<L4> [0.00%]:
+  return D.15140;
+
+<L5> [0.00%]:
+  first = {CLOBBER};
+  resx 1
+
+}
+
+

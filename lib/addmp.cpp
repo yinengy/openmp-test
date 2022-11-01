@@ -5,9 +5,10 @@
 #include "addmp.h"
 
 const int REPEAT = 10;
+const int NUM_CORE = 24;
 
-#define COUNT_CORE  // if define, will print thread mapping bitmap
-#define BIND_CORE   // if define, will bind thread to core
+// #define COUNT_CORE  // if define, will print thread mapping bitmap
+// #define BIND_CORE   // if define, will bind thread to core
 
 std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -19,7 +20,7 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     std::vector<int> result(num_items);
 
     #ifdef COUNT_CORE
-    std::vector<int> core_count(48, 0);  // assume 48 core
+    std::vector<int> core_count(NUM_CORE, 0);
     #endif
 
     #pragma omp parallel private(th_id)
@@ -30,8 +31,8 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
         // bind thread to core manually
         cpu_set_t my_set;
         CPU_ZERO(&my_set);
-        CPU_SET(th_id, &my_set);
-        // CPU_SET(th_id / 2, &my_set);
+        // CPU_SET(th_id, &my_set);
+        CPU_SET(th_id + 12, &my_set);
         sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
         #endif
 
