@@ -11,9 +11,8 @@ const int NUM_CORE = 24;
 // #define BIND_CORE   // if define, will bind thread to core
 
 int sum(std::vector<int> &v) {
-    auto t1 = std::chrono::high_resolution_clock::now();
     int num_items = v.size();
-    int num_threads = omp_get_max_threads();
+    int num_threads = 24;
     int batch_size = num_items / num_threads;
 
     int th_id;
@@ -24,8 +23,10 @@ int sum(std::vector<int> &v) {
     std::vector<int> core_count(NUM_CORE, 0);  // assume 48 core
     #endif
 
-    #pragma omp parallel private(th_id) firstprivate(partial_sum)
+    auto t1 = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel private(th_id) firstprivate(partial_sum) num_threads(24)
     {   
+        // printf("summp: cpu_id: %d\n", sched_getcpu());
         th_id = omp_get_thread_num();
 
         #ifdef BIND_CORE
@@ -52,8 +53,8 @@ int sum(std::vector<int> &v) {
     }
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::cout << "summp: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
-
+    std::cout << "summp: finish in " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "ms" << std::endl;
+    std::cout << "summp: result: " << sum << std::endl;
     #ifdef COUNT_CORE
     std::cout << "core map:" << std::endl;
     for (int i : core_count) {

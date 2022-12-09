@@ -4,16 +4,15 @@
 #include <chrono>
 #include "addmp.h"
 
-const int REPEAT = 10;
+const int REPEAT = 40;
 const int NUM_CORE = 24;
 
 // #define COUNT_CORE  // if define, will print thread mapping bitmap
 // #define BIND_CORE   // if define, will bind thread to core
 
 std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
-    auto t1 = std::chrono::high_resolution_clock::now();
     int num_items = first.size();
-    int num_threads = omp_get_max_threads();
+    int num_threads = 24;
     int batch_size = num_items / num_threads;
 
     int th_id;
@@ -23,8 +22,10 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     std::vector<int> core_count(NUM_CORE, 0);
     #endif
 
-    #pragma omp parallel private(th_id)
+    auto t1 = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel private(th_id) num_threads(24)
     {   
+        // printf("addmp: cpu_id: %d\n", sched_getcpu());
         th_id = omp_get_thread_num();
 
         #ifdef BIND_CORE
@@ -52,7 +53,7 @@ std::vector<int> add(std::vector<int> &first, std::vector<int> &second) {
     }
     
     auto t2 = std::chrono::high_resolution_clock::now();
-    std::cout << "addmp: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << std::endl;
+    std::cout << "addmp: finish in " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << "ms" << std::endl;
 
     #ifdef COUNT_CORE
     std::cout << "core map:" << std::endl;

@@ -8,31 +8,40 @@
 #include "addmp3.h"
 #include "addmp4.h"
 
+pthread_barrier_t barrier;
+
+void launch0(std::vector<int> first) {
+    pthread_barrier_wait(&barrier);
+    sum(first);
+}
+
+void launch1(std::vector<int> first, std::vector<int> second) {
+    pthread_barrier_wait(&barrier);
+    add(first, second);
+}
 
 int main(int argc, char *argv[]) {
     int HAS_T0 = atoi(argv[1]);
     int HAS_T1 = atoi(argv[2]);
-    int size = 120000000;
-    std::vector<int> first(size, 1);
-    std::vector<int> second(size, -2);
 
-    std::vector<std::thread> t(4);
+    int size = 12000000;
+    std::vector<int> v0(size, 1);
+    std::vector<int> v1(size, 1);
+    std::vector<int> v2(size, 1);
+
+    std::vector<std::thread> t(2);
+
+    pthread_barrier_init(&barrier, NULL, 2);
 
     if (HAS_T0) {
-        t[0] = std::thread(add, std::ref(first), std::ref(second));
-        t[2] = std::thread(add2, std::ref(first), std::ref(second));
-        t[3] = std::thread(add3, std::ref(first), std::ref(second));
-        t[4] = std::thread(add4, std::ref(first), std::ref(second));
+        t[0] = std::thread(launch0, v0);
     }
 
     if (HAS_T1)
-        t[1] = std::thread(sum, std::ref(first));
+        t[1] = std::thread(launch1, v1, v2);
 
     if (HAS_T0) {
         t[0].join();
-        t[2].join();
-        t[3].join();
-        t[4].join();
     }
     if (HAS_T1)
         t[1].join();

@@ -23,11 +23,21 @@ lib/libaddmp4.so: lib/addmp4.o
 lib/libsummp.so: lib/summp.o
 	$(CXX) -shared -o $@ $< -fopenmp -fPIC
 
-preloader.so: preloader.cpp
-	$(CXX) $(CFLAGS) -shared -o preloader.so preloader.cpp -ldl
+lib/libvec.so: lib/vec.cpp
+	$(CXX) $(CFLAGS) -shared -o $@ $< -pthread
 
-test: lib/dog.so lib/cat.so test.cpp
-	$(CXX) $(CFLAGS) -o test test.cpp -l:dog.so -ldl  -pie
+preloader.so: preloader.cpp
+	$(CXX) $(CFLAGS) -shared -o preloader.so preloader.cpp -fopenmp -ldl
+
+preload_affinity.so: preload_affinity.cpp
+	$(CXX) -shared -o preload_affinity.so preload_affinity.cpp -fPIC -pthread -ldl
+
+test: lib/libsummp.so lib/libaddmp.so test.cpp lib/libvec.so preload_affinity.so
+	$(CXX) $(CFLAGS) -o test test.cpp -lvec -fopenmp -pthread -ldl 
+
+test_openmp: test_openmp.cpp preload_affinity.cpp
+	$(CXX) -o test_openmp test_openmp.cpp -fopenmp -pthread -ldl
+	$(CXX) -shared -o preload_affinity.so preload_affinity.cpp -fPIC -pthread -ldl
 
 launcher: launcher.cpp
 	$(CXX) $(CFLAGS) -o $@ $< -ldl
@@ -36,4 +46,4 @@ launcher: launcher.cpp
 	$(CXX) -shared -o $@ $< -fPIC
 
 clean:
-	rm -f *.o *.so lib/*.so lib/*.o main launcher
+	rm -f *.o *.so lib/*.so lib/*.o main launcher preload_affinity test_openmp test
